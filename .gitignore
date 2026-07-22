@@ -4,6 +4,7 @@ venv/
 # Data (fichiers volumineux)
 data/*.csv
 data/*.zip
+data/processed/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -28,3 +29,7 @@ build/
 # IDE
 .vscode/
 .idea/
+
+# Logs
+*.log
+logs/
