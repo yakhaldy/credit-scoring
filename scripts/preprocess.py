@@ -9,9 +9,15 @@ data/processed/ for train.py and predict.py to consume.
 
 import os
 import re
+import warnings
 
 import numpy as np
 import pandas as pd
+from pandas.errors import PerformanceWarning
+
+# Wide, repeatedly-assigned dataframes (350+ columns) trigger pandas'
+# block-consolidation heuristic; it's a perf note, not a correctness issue.
+warnings.filterwarnings("ignore", category=PerformanceWarning)
 
 DATA_DIR = "data"
 OUTPUT_DIR = "data/processed"
@@ -27,6 +33,22 @@ def inspect_dataframe(df, name):
     df.info()
     print(f"\nMissing values:\n{df.isnull().sum()[df.isnull().sum() > 0]}")
     print(f"\nSample (5 rows):\n{df.head(5)}")
+
+
+def reduce_mem_usage(df):
+    """Downcast numeric columns to the smallest dtype that fits their range."""
+    for col in df.columns:
+        col_type = df[col].dtype
+        if not pd.api.types.is_numeric_dtype(col_type):
+            continue
+        c_min, c_max = df[col].min(), df[col].max()
+        if str(col_type)[:3] == "int":
+            if c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+                df[col] = df[col].astype(np.int32)
+        else:
+            if c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+                df[col] = df[col].astype(np.float32)
+    return df
 
 
 def load_raw_data():
@@ -216,6 +238,7 @@ def build_features():
         df = df.merge(agg, on="SK_ID_CURR", how="left")
 
     df = df.replace([np.inf, -np.inf], np.nan)
+    df = reduce_mem_usage(df)
 
     train_df = df[df["IS_TRAIN"] == 1].drop(columns=["IS_TRAIN"]).reset_index(drop=True)
     test_df = df[df["IS_TRAIN"] == 0].drop(columns=["IS_TRAIN", "TARGET"]).reset_index(drop=True)
