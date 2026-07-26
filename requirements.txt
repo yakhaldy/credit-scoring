@@ -10,3 +10,4 @@ plotly
 lightgbm
 xgboost
 imbalanced-learn
+kaleido
