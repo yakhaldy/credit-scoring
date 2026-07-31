@@ -2,7 +2,7 @@
 
 Reads the engineered features from data/processed/train.pkl (built by
 preprocess.py), carves out a stratified 80/20 held-out validation split,
-trains a LightGBM classifier, and saves:
+trains a LightGBM classifier with early stopping, and saves:
   - results/model/my_own_model.pkl   (model + feature list + validation AUC)
   - results/model/learning_curve.png (train vs validation AUC per boosting round)
   - results/model/feature_importance.png (global feature importance)
@@ -14,7 +14,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from lightgbm import LGBMClassifier
+from lightgbm import LGBMClassifier, early_stopping, log_evaluation
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
@@ -32,7 +32,8 @@ def load_train_data():
 
 def train_model(X_train, y_train, X_val, y_val):
     # Regularization to fight overfitting: shallow-ish trees (num_leaves=31),
-    # L1/L2 penalties, row/column subsampling, and a minimum leaf size.
+    # L1/L2 penalties, row/column subsampling, and a minimum leaf size —
+    # combined with early stopping on the validation AUC (see learning curve).
     model = LGBMClassifier(
         n_estimators=2000,
         learning_rate=0.02,
@@ -55,6 +56,7 @@ def train_model(X_train, y_train, X_val, y_val):
         eval_set=[(X_train, y_train), (X_val, y_val)],
         eval_metric="auc",
         eval_names=["train", "valid"],
+        callbacks=[early_stopping(stopping_rounds=100), log_evaluation(period=100)],
     )
     return model
 
@@ -63,10 +65,12 @@ def plot_learning_curve(model, path):
     results = model.evals_result_
     train_auc = results["train"]["auc"]
     valid_auc = results["valid"]["auc"]
+    best_iter = model.best_iteration_
 
     plt.figure(figsize=(9, 6))
     plt.plot(train_auc, label="Train AUC")
     plt.plot(valid_auc, label="Validation AUC")
+    plt.axvline(best_iter, color="red", linestyle="--", label=f"Early stopping (iter {best_iter})")
     plt.xlabel("Boosting iteration")
     plt.ylabel("AUC")
     plt.title("Learning curve — LightGBM (Train vs Validation AUC)")
@@ -101,6 +105,7 @@ def main():
     val_pred = model.predict_proba(X_val)[:, 1]
     auc = roc_auc_score(y_val, val_pred)
     print(f"\nValidation AUC: {auc:.4f}")
+    print(f"Best iteration: {model.best_iteration_}")
 
     os.makedirs(MODEL_DIR, exist_ok=True)
     plot_learning_curve(model, f"{MODEL_DIR}/learning_curve.png")
