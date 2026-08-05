@@ -11,3 +11,4 @@ lightgbm
 xgboost
 imbalanced-learn
 kaleido
+dash
