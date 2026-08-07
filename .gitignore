@@ -33,3 +33,8 @@ build/
 # Logs
 *.log
 logs/
+
+# Assignment brief (kept locally, not part of the submission)
+subject.md
+readme_data.md
+data_description.png
