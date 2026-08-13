@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 Data: unzip `data/home-credit-default-risk.zip` into `data/` so that
 `data/application_train.csv`, `data/bureau.csv`, etc. exist at the paths
-read by the scripts below.
+read by the scripts below [DataSets](https://assets.01-edu.org/ai-branch/project5/home-credit-default-risk.zip) .
 
 1. **Feature engineering** — reads the 7 raw CSVs, aggregates the 5
    supplementary tables per client, engineers ratios/flags, one-hot

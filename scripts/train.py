@@ -18,8 +18,8 @@ from lightgbm import LGBMClassifier, early_stopping, log_evaluation
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
-PROCESSED_DIR = "data/processed"
-MODEL_DIR = "results/model"
+PROCESSED_DIR = "../data/processed"
+MODEL_DIR = "../results/model"
 ID_TARGET_COLS = ["SK_ID_CURR", "TARGET"]
 
 

@@ -19,8 +19,8 @@ from pandas.errors import PerformanceWarning
 # block-consolidation heuristic; it's a perf note, not a correctness issue.
 warnings.filterwarnings("ignore", category=PerformanceWarning)
 
-DATA_DIR = "data"
-OUTPUT_DIR = "data/processed"
+DATA_DIR = "../data"
+OUTPUT_DIR = "../data/processed"
 
 
 def inspect_dataframe(df, name):
@@ -216,7 +216,8 @@ def build_features():
     print("Engineering application-level features...")
     df = engineer_application_features(df)
 
-    cat_cols = df.select_dtypes(include=["object", "str"]).columns.tolist()
+    # print(df.dtypes)
+    cat_cols = df.select_dtypes(include=["object"]).columns.tolist()
     df = pd.get_dummies(df, columns=cat_cols, dummy_na=True)
     # LightGBM rejects special/JSON characters in feature names (one-hot columns
     # can contain ": , / etc." from raw category values, e.g. "Industry: type 3").
