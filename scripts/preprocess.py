@@ -19,8 +19,8 @@ from pandas.errors import PerformanceWarning
 # block-consolidation heuristic; it's a perf note, not a correctness issue.
 warnings.filterwarnings("ignore", category=PerformanceWarning)
 
-DATA_DIR = "../data"
-OUTPUT_DIR = "../data/processed"
+DATA_DIR = "data"
+OUTPUT_DIR = "data/processed"
 
 
 def inspect_dataframe(df, name):

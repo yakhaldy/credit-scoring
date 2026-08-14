@@ -95,7 +95,9 @@ def load_raw_row(client_id, dataset):
     raw = pd.read_csv(path, usecols=cols)
     row = raw[raw["SK_ID_CURR"] == client_id]
     if row.empty:
-        raise ValueError(f"Client {client_id} not found in application_{dataset}.csv")
+        # raise ValueError(f"Client {client_id} not found in application_{dataset}.csv")
+        print(f"Client {client_id} not found in application_{dataset}.csv")
+        return None
     return row.iloc[0]
 
 
@@ -225,7 +227,9 @@ def render_client_report(client_id, dataset, output_path, true_label_override=No
     processed = load_processed(dataset)
     client_processed = processed[processed["SK_ID_CURR"] == client_id]
     if client_processed.empty:
-        raise ValueError(f"Client {client_id} not found in processed {dataset} set")
+        # raise ValueError(f"Client {client_id} not found in processed {dataset} set")
+        print(f"Client {client_id} not found in processed {dataset} set")
+        return
     client_features = client_processed[features]
 
     raw_row = load_raw_row(client_id, dataset)
@@ -252,7 +256,7 @@ def render_client_report(client_id, dataset, output_path, true_label_override=No
         shap.plots.force(
             explanation.base_values[0], explanation.values[0], client_features.iloc[0], matplotlib=True, show=False
         )
-        plt.suptitle(f"SHAP force plot — SK_ID_CURR {client_id} (score={score:.1%})", y=1.05)
+        plt.suptitle(f"SHAP force plot — SK_ID_CURR {client_id} (score={score:.1%})", y=1.4)
         pdf.savefig(bbox_inches="tight")
         plt.close()
 
@@ -260,7 +264,7 @@ def render_client_report(client_id, dataset, output_path, true_label_override=No
         # readable than the force plot once more than a handful of features matter)
         plt.figure(figsize=(11, 8.5))
         shap.plots.waterfall(explanation[0], max_display=15, show=False)
-        plt.title(f"SHAP contributions — SK_ID_CURR {client_id} (score={score:.1%})")
+        plt.title(f"SHAP contributions — SK_ID_CURR {client_id} (score={score:.1%})", x=0.5, y=1.05)
         plt.tight_layout()
         pdf.savefig()
         plt.close()
