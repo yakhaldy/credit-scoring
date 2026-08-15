@@ -1,17 +1,4 @@
-"""Dash dashboard for the credit-scoring model (bonus deliverable).
 
-Enter a customer id (from application_train.csv or application_test.csv)
-and get back the predicted probability of default, a human-readable
-client profile, the SHAP contribution of each feature to that specific
-score, and a comparison of the client against the train population.
-
-Reuses the model-loading and figure-building logic from scripts/explain.py
-so the dashboard and the standalone PDF reports stay consistent.
-
-Run from the project root:
-    python results/dashboard/dashboard.py
-then open http://127.0.0.1:8050 in a browser.
-"""
 
 import importlib.util
 from pathlib import Path
