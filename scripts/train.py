@@ -1,12 +1,3 @@
-"""Train the credit-scoring model (LightGBM) and produce the evaluation report assets.
-
-Reads the engineered features from data/processed/train.pkl (built by
-preprocess.py), carves out a stratified 80/20 held-out validation split,
-trains a LightGBM classifier with early stopping, and saves:
-  - results/model/my_own_model.pkl   (model + feature list + validation AUC)
-  - results/model/learning_curve.png (train vs validation AUC per boosting round)
-  - results/model/feature_importance.png (global feature importance)
-"""
 
 import os
 import pickle
@@ -31,9 +22,6 @@ def load_train_data():
 
 
 def train_model(X_train, y_train, X_val, y_val):
-    # Regularization to fight overfitting: shallow-ish trees (num_leaves=31),
-    # L1/L2 penalties, row/column subsampling, and a minimum leaf size —
-    # combined with early stopping on the validation AUC (see learning curve).
     model = LGBMClassifier(
         n_estimators=2000,
         learning_rate=0.02,

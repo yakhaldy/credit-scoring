@@ -1,18 +1,4 @@
-"""Score application_test.csv with the trained model and write the Kaggle submission file.
 
-Loads the model trained by train.py (results/model/my_own_model.pkl) and the
-engineered test features (data/processed/test.pkl, built by preprocess.py),
-predicts the probability of default for every SK_ID_CURR, and writes
-results/prediction.csv in the format expected by the Home Credit Default Risk
-Kaggle competition (SK_ID_CURR, TARGET).
-
-Note: application_test.csv has no TARGET column, so no AUC can be computed on
-it locally. The AUC printed below is the held-out validation AUC computed by
-train.py on a stratified split of application_train.csv — that is the number
-reported and defended at the audit. To get the real test-set AUC, submit
-results/prediction.csv to the Kaggle competition and read the public
-leaderboard score.
-"""
 
 import pickle
 
