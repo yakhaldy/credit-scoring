@@ -1,1 +1,2 @@
-yakhaldy MA_03_2026
+username = yakhaldyma032026
+name = yakhaldy 01EDU_MA_03_2026

@@ -17,6 +17,7 @@ warnings.filterwarnings("ignore", category=PerformanceWarning)
 DATA_DIR = "data"
 PROCESSED_DIR = "data/processed"
 MODEL_PATH = "results/model/my_own_model.pkl"
+RESULTS_PATH = "results/clients_outputs/"
 
 
 RAW_DISPLAY_COLS = [
@@ -272,6 +273,7 @@ def main():
     parser.add_argument("--dataset", choices=["train", "test"], default="train")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
+    args.output = RESULTS_PATH + args.output
 
     render_client_report(args.client_id, args.dataset, args.output)
 
