@@ -1,17 +1,3 @@
-"""Local interpretability tool for the credit-scoring model.
-
-Given a trained model and a customer id (from application_train.csv or
-application_test.csv), produces:
-  - the predicted probability of default (the "score")
-  - a SHAP waterfall/force plot showing each feature's contribution
-  - a Plotly table describing the client and their loan(s) in human-readable terms
-  - a Plotly comparison of the client against the train population (by TARGET class)
-and saves everything as a single PDF report.
-
-Usage:
-    python scripts/explain.py --client_id 100002 --dataset train --output results/clients_outputs/client1_correct_train.pdf
-"""
-
 import argparse
 import io
 import pickle
@@ -32,9 +18,7 @@ DATA_DIR = "data"
 PROCESSED_DIR = "data/processed"
 MODEL_PATH = "results/model/my_own_model.pkl"
 
-# Human-readable fields pulled from the raw (non-encoded) application CSVs,
-# used only for the client-profile display — SHAP/scoring always use the
-# engineered features from data/processed/*.pkl.
+
 RAW_DISPLAY_COLS = [
     "SK_ID_CURR",
     "CODE_GENDER",

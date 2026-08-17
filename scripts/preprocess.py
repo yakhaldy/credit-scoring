@@ -54,11 +54,19 @@ def engineer_application_features(df):
     return df
 
 
-def aggregate_bureau(bureau):
+def aggregate_bureau(bureau, bureau_balance):
+    bb_agg = bureau_balance.groupby("SK_ID_BUREAU").agg(
+        BB_MONTHS_COUNT=("MONTHS_BALANCE", "count"),
+        BB_DPD_COUNT=("STATUS", lambda s: s.isin(["1", "2", "3", "4", "5"]).sum()),
+    )
+    bureau = bureau.merge(bb_agg, on="SK_ID_BUREAU", how="left")
+
     num_agg = {
         "AMT_CREDIT_SUM": ["mean"],
         "AMT_CREDIT_SUM_DEBT": ["mean"],
         "CREDIT_DAY_OVERDUE": ["mean"],
+        "BB_MONTHS_COUNT": ["mean"],
+        "BB_DPD_COUNT": ["mean"],
     }
     agg = bureau.groupby("SK_ID_CURR").agg(num_agg)
     agg.columns = ["BUREAU_" + "_".join(c).upper() for c in agg.columns]
@@ -115,7 +123,7 @@ def aggregate_installments(inst):
 
 def build_features():
     print("Loading raw CSV files...")
-    train, test, bureau, _, prev, pos, cc, inst = load_raw_data()
+    train, test, bureau, bureau_balance, prev, pos, cc, inst = load_raw_data()
     print(f"  application_train: {train.shape}, application_test: {test.shape}")
 
     train = train.assign(IS_TRAIN=1)
@@ -130,8 +138,8 @@ def build_features():
     
     df.columns = [re.sub(r"\W+", "_", c) for c in df.columns]
 
-    print("Aggregating bureau...")
-    bureau_agg = aggregate_bureau(bureau)
+    print("Aggregating bureau + bureau_balance...")
+    bureau_agg = aggregate_bureau(bureau, bureau_balance)
     print("Aggregating previous_application...")
     prev_agg = aggregate_previous_application(prev)
     print("Aggregating POS_CASH_balance...")
