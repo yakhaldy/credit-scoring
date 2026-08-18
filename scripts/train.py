@@ -102,7 +102,15 @@ def main():
     with open(f"{MODEL_DIR}/my_own_model.pkl", "wb") as f:
         pickle.dump({"model": model, "features": X.columns.tolist(), "val_auc": auc}, f)
 
+    with open(f"{MODEL_DIR}/model_report.txt", "w") as f:
+        f.write(f"Validation AUC: {auc:.4f}\n")
+        f.write(f"Best iteration: {model.best_iteration_}\n")
+        f.write(f"Number of features: {len(X.columns)}\n")
+        f.write(f"Feature names: {', '.join(X.columns.tolist())}\n")
+    
+
     print(f"\nSaved model to {MODEL_DIR}/my_own_model.pkl")
+    print(f"Saved {MODEL_DIR}/model_report.txt")
     print(f"Saved {MODEL_DIR}/learning_curve.png")
     print(f"Saved {MODEL_DIR}/feature_importance.png")
 

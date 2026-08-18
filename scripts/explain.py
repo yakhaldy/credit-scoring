@@ -87,7 +87,6 @@ def load_raw_row(client_id, dataset):
 
 
 def compute_explanation(model, client_features):
-    """Returns (score, shap.Explanation for the single client)."""
     score = model.predict_proba(client_features)[:, 1][0]
     explainer = shap.TreeExplainer(model)
     explanation = explainer(client_features)
@@ -238,8 +237,9 @@ def render_client_report(client_id, dataset, output_path, true_label_override=No
         plt.close()
 
         # Page 2 — SHAP force plot (base value -> f(x), pushed by each feature)
+        plt.figure(figsize=(16, 5))
         shap.plots.force(
-            explanation.base_values[0], explanation.values[0], client_features.iloc[0], matplotlib=True, show=False
+            explanation.base_values[0], explanation.values[0], client_features.iloc[0], matplotlib=True, show=False, contribution_threshold=0.05, text_rotation=45
         )
         plt.suptitle(f"SHAP force plot — SK_ID_CURR {client_id} (score={score:.1%})", y=1.4)
         pdf.savefig(bbox_inches="tight")
@@ -247,12 +247,12 @@ def render_client_report(client_id, dataset, output_path, true_label_override=No
 
         # Page 3 — SHAP waterfall (same values, full ranked breakdown — more
         # readable than the force plot once more than a handful of features matter)
-        plt.figure(figsize=(11, 8.5))
+        fig =plt.figure(figsize=(15, 8))
         shap.plots.waterfall(explanation[0], max_display=15, show=False)
-        plt.title(f"SHAP contributions — SK_ID_CURR {client_id} (score={score:.1%})", x=0.5, y=1.05)
-        plt.tight_layout()
-        pdf.savefig()
-        plt.close()
+        plt.title(f"SHAP contributions — SK_ID_CURR {client_id} (score={score:.1%})", fontsize=16,fontweight="bold",y=0.98)
+        plt.tight_layout(rect=[0, 0, 1, 0.94])
+        pdf.savefig(fig, bbox_inches="tight")
+        plt.close(fig)
 
         # Page 4 — comparison vs population (Plotly -> static image)
         plt.figure(figsize=(11, 5))
