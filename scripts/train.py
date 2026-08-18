@@ -16,9 +16,12 @@ ID_TARGET_COLS = ["SK_ID_CURR", "TARGET"]
 
 def load_train_data():
     df = pd.read_pickle(f"{PROCESSED_DIR}/train.pkl")
+    ids = df["SK_ID_CURR"]
+    # print("==============================================================")
+    # print(ids.head())
     y = df["TARGET"].astype(int)
     X = df.drop(columns=ID_TARGET_COLS)
-    return X, y
+    return X, y, ids
 
 
 def train_model(X_train, y_train, X_val, y_val):
@@ -82,7 +85,7 @@ def plot_feature_importance(model, feature_names, path, top_n=25):
 
 
 def main():
-    X, y = load_train_data()
+    X, y, ids_val = load_train_data()
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=0.2, stratify=y, random_state=42
     )
@@ -91,6 +94,38 @@ def main():
     model = train_model(X_train, y_train, X_val, y_val)
 
     val_pred = model.predict_proba(X_val)[:, 1]
+    
+#33333333333333333333333333333333333333333333333333333333333333333333
+    # find a client the model got wrong 
+    val_preds = (val_pred >= 0.5).astype(int)
+    eval_df = pd.DataFrame({
+        "SK_ID_CURR": ids_val.values,
+        "actual_target": y_val.values,
+        "predicted_class": val_preds,
+        "predicted_prob": val_pred,
+        "error_magnitude": np.abs(y_val.values - val_pred)
+    })
+    # Filter misclassifications
+    misclassified = eval_df[eval_df["actual_target"] != eval_df["predicted_class"]]
+
+    # Extract specific client categories
+    false_positives = eval_df[(eval_df["actual_target"] == 0) & (eval_df["predicted_class"] == 1)]
+    false_negatives = eval_df[(eval_df["actual_target"] == 1) & (eval_df["predicted_class"] == 0)]
+
+    print(f"Total validation clients: {len(eval_df)}")
+    print(f"Total misclassified: {len(misclassified)}")
+    print(f"False Positives (Target 0 predicted as 1): {len(false_positives)}")
+    print(f"False Negatives (Target 1 predicted as 0): {len(false_negatives)}")
+
+    # Top 5 most confidently wrong clients
+    print("\nTop 5 Worst False Positives (Lowest risk clients predicted as high risk):")
+    print(false_positives.sort_values("predicted_prob", ascending=False).head(5))
+
+    print("\nTop 5 Worst False Negatives (High risk clients predicted as low risk):")
+    print(false_negatives.sort_values("predicted_prob", ascending=True).head(5))
+
+#33333333333333333333333333333333333333333333333333333333333333333333
+
     auc = roc_auc_score(y_val, val_pred)
     print(f"\nValidation AUC: {auc:.4f}")
     print(f"Best iteration: {model.best_iteration_}")
