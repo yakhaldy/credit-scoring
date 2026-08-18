@@ -85,16 +85,16 @@ def plot_feature_importance(model, feature_names, path, top_n=25):
 
 
 def main():
-    X, y, ids_val = load_train_data()
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, stratify=y, random_state=42
+    X, y, ids = load_train_data()
+    X_train, X_val, y_train, y_val, ids_train, ids_val = train_test_split(
+        X, y, ids, test_size=0.2, stratify=y, random_state=42
     )
     print(f"Train: {X_train.shape}, Validation: {X_val.shape}")
 
     model = train_model(X_train, y_train, X_val, y_val)
 
     val_pred = model.predict_proba(X_val)[:, 1]
-    
+
 #33333333333333333333333333333333333333333333333333333333333333333333
     # find a client the model got wrong 
     val_preds = (val_pred >= 0.5).astype(int)
